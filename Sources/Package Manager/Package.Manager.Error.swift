@@ -15,5 +15,11 @@ extension Package.Manager {
         case locked(directory: Swift.String)
 
         case timedOut(directory: Swift.String)
+
+        case manifestUnavailable(directory: Swift.String)
+
+        case manifestChanged(directory: Swift.String)
+
+        case toolchain
     }
 }

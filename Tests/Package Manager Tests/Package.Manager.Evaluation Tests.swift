@@ -1,3 +1,4 @@
+import Foundation
 import Package_Manager
 import Testing
 
@@ -159,6 +160,64 @@ extension Package.Manager {
                 #expect(manifest.toolsVersion == evaluation.toolsVersion)
                 #expect(manifest.dependencies.count == evaluation.dependencies.count)
             }
+
+            @Test
+            func `evaluation puts SwiftPM state in the supplied scratch directory`() throws {
+                let fixture = try Self.fixture()
+                defer { try? FileManager.default.removeItem(at: fixture.root) }
+
+                let evaluation = try Package.Manager().evaluation(
+                    at: fixture.package.path,
+                    scratch: fixture.scratch.path
+                )
+
+                #expect(evaluation.name == "fixture")
+                #expect(FileManager.default.fileExists(atPath: fixture.scratch.path))
+                #expect(
+                    FileManager.default.fileExists(
+                        atPath: fixture.package.appending(path: ".build").path
+                    ) == false
+                )
+            }
+
+            @Test
+            func `evaluation reports the package directory when its process exceeds the bound`()
+                throws
+            {
+                let fixture = try Self.fixture()
+                defer { try? FileManager.default.removeItem(at: fixture.root) }
+                let executable = fixture.root.appending(path: "hang")
+                try Data("#!/bin/sh\nsleep 5\n".utf8).write(to: executable)
+                try FileManager.default.setAttributes(
+                    [.posixPermissions: 0o755],
+                    ofItemAtPath: executable.path
+                )
+
+                #expect(
+                    throws: Package.Manager.Error.timedOut(directory: fixture.package.path)
+                ) {
+                    _ = try Package.Manager(executable: executable.path).evaluation(
+                        at: fixture.package.path,
+                        timeout: .milliseconds(50),
+                        scratch: fixture.scratch.path
+                    )
+                }
+            }
+
+            @Test
+            func `catalog binds targets to exact manifest bytes and the active toolchain`() throws {
+                let fixture = try Self.fixture()
+                defer { try? FileManager.default.removeItem(at: fixture.root) }
+
+                let catalog = try Package.Manager().catalog(
+                    at: fixture.package.path,
+                    scratch: fixture.scratch.path
+                )
+
+                #expect(catalog.manifest.count == 64)
+                #expect(catalog.toolchain.count == 64)
+                #expect(catalog.evaluation.name == "fixture")
+            }
         }
 
         @Suite(
@@ -202,5 +261,23 @@ extension Package.Manager {
                 #expect(observed > 0)
             }
         }
+    }
+}
+
+extension Package.Manager.Test.Unit {
+    private static func fixture() throws -> (root: URL, package: URL, scratch: URL) {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let package = root.appending(path: "fixture")
+        let scratch = root.appending(path: "scratch")
+        try FileManager.default.createDirectory(at: package, withIntermediateDirectories: true)
+        try Data(
+            """
+            // swift-tools-version: 6.4
+            import PackageDescription
+
+            let package = Package(name: "fixture")
+            """.utf8
+        ).write(to: package.appending(path: "Package.swift"))
+        return (root, package, scratch)
     }
 }

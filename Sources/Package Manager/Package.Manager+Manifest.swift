@@ -3,8 +3,12 @@ public import SPM_Standard
 
 extension Package.Manager {
 
-    public func manifest(at directory: Swift.String) throws(Error) -> Package.Manifest {
-        let json = try dump(at: directory)
+    public func manifest(
+        at directory: Swift.String,
+        timeout: Swift.Duration = .seconds(120),
+        scratch: Swift.String? = nil
+    ) throws(Error) -> Package.Manifest {
+        let json = try dump(at: directory, timeout: timeout, scratch: scratch)
         do throws(JSON.Error) {
             return try decode(json)
         } catch {
