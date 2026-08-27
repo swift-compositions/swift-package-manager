@@ -86,7 +86,7 @@ extension Package.Manifest.Identity.Conflict.Test.`Edge Case` {
         let source = """
             let unrelated = "https://github.com/elsewhere/swift-alpha.git"
             dependencies: [
-                .package (url: "https://github.com/swift-primitives/swift-alpha.git", branch: "main")
+                .package (url: "https://github.com/swift-molecules/swift-alpha.git", branch: "main")
             ]
             """
 

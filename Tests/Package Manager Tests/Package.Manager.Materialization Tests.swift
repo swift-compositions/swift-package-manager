@@ -81,30 +81,30 @@ extension Package.Manager {
 
             let superseded = Package.Resolution.Dependency.Superseded(
                 reference: Self.reference(
-                    "swift-parser-primitives",
+                    "swift-parser",
                     kind: .localSourceControl,
-                    location: "/fixture/worktrees/swift-parser-primitives"
+                    location: "/fixture/worktrees/swift-parser"
                 ),
                 checkout: .init(revision: "aaa111", pin: .branch("main")),
-                subpath: "swift-parser-primitives"
+                subpath: "swift-parser"
             )
             let dependency = Package.Resolution.Dependency(
                 reference: Self.reference(
-                    "swift-parser-primitives",
+                    "swift-parser",
                     kind: .localSourceControl,
-                    location: "/fixture/worktrees/swift-parser-primitives"
+                    location: "/fixture/worktrees/swift-parser"
                 ),
                 state: .edited(
-                    path: "/fixture/edited/swift-parser-primitives",
+                    path: "/fixture/edited/swift-parser",
                     basedOn: superseded
                 ),
-                subpath: "swift-parser-primitives"
+                subpath: "swift-parser"
             )
 
             let path = Package.Manager().materialized
                 .source(of: dependency, at: "/fixture/root")
 
-            #expect(path == "/fixture/edited/swift-parser-primitives")
+            #expect(path == "/fixture/edited/swift-parser")
             #expect(path.contains("checkouts") == false)
 
             #expect(dependency.state.superseded?.checkout.revision == "aaa111")

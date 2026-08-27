@@ -54,8 +54,8 @@ extension Package.Manifest.Clause.Test.Unit {
     @Test
     func `source control facts include branch and exclude comments`() {
         let source = """
-            // .package(url: "https://github.com/swift-primitives/ignored.git", branch: "feature")
-            .package(url: "https://github.com/swift-primitives/swift-alpha.git", branch: "main")
+            // .package(url: "https://github.com/swift-molecules/ignored.git", branch: "feature")
+            .package(url: "https://github.com/swift-molecules/swift-alpha.git", branch: "main")
             """
         let facts = Package.Manifest.Dependency.SourceControl.all(
             in: source,
@@ -64,7 +64,7 @@ extension Package.Manifest.Clause.Test.Unit {
         #expect(
             facts == [
                 .init(
-                    url: "https://github.com/swift-primitives/swift-alpha.git",
+                    url: "https://github.com/swift-molecules/swift-alpha.git",
                     branch: "main",
                     document: "Package.swift"
                 )

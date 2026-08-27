@@ -1,7 +1,7 @@
 # .github/metadata.yaml
 description: "Foundation-free SwiftPM manifest evaluation through the installed Swift toolchain."
 topics:
-  - foundations
+  - compositions
   - swiftpm
   - package-manager
 homepage: "https://swift-institute.org"

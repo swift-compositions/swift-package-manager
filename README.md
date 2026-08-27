@@ -25,7 +25,7 @@ print(manifest.name)
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-package-manager.git", branch: "main")
+    .package(url: "https://github.com/swift-compositions/swift-package-manager.git", branch: "main")
 ]
 ```
 
@@ -41,7 +41,7 @@ Use the `Package Manager` product and import `Package_Manager`.
 
 ## Architecture
 
-`Package.Manager` owns operational SwiftPM interaction. It invokes `swift package dump-package` through [swift-process](https://github.com/swift-foundations/swift-process), parses output through [swift-json](https://github.com/swift-foundations/swift-json), and returns the external SwiftPM representations in [swift-spm-standard](https://github.com/swift-standards/swift-spm-standard).
+`Package.Manager` owns operational SwiftPM interaction. It invokes `swift package dump-package` through [swift-process](https://github.com/swift-compositions/swift-process), parses output through [swift-json](https://github.com/swift-compositions/swift-json), and returns the external SwiftPM representations in [swift-spm-standard](https://github.com/swift-standards/swift-spm-standard).
 
 ---
 

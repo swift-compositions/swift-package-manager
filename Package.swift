@@ -20,9 +20,9 @@ let package = Package(
             branch: "main"
         ),
         .package(url: "https://github.com/swift-standards/swift-spm-standard.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-file-system.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-json.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-process.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-json.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
     ],
     targets: [
         .target(
