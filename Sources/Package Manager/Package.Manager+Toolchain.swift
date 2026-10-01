@@ -31,6 +31,6 @@ extension Package.Manager {
         guard let stdout = output.stdout, !stdout.isEmpty else {
             throw .toolchain
         }
-        return stdout.map(Byte.init)
+        return stdout.map(Byte.init(bitPattern:))
     }
 }

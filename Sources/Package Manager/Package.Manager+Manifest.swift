@@ -128,19 +128,31 @@ extension Package.Manager {
     }
 
     private func tools(_ value: Swift.String) throws(JSON.Error) -> Version.Tools {
-        do throws(Version.Tools.Error) {
-            return try Version.Tools(parsing: value)
+        var input = [Byte](utf8: value)[...]
+        let parsed: Version.Tools?
+        do throws(Version.Tools.ParserError) {
+            parsed = try Version.Tools.parser.parse(&input)
         } catch {
+            parsed = nil
+        }
+        guard let parsed, input.isEmpty else {
             throw .typeMismatch(expected: "valid swift-tools-version", got: value)
         }
+        return parsed
     }
 
     private func semantic(_ value: Swift.String) throws(JSON.Error) -> Version.Semantic {
-        do throws(Version.Semantic.Error) {
-            return try Version.Semantic(parsing: value)
+        var input = [Byte](utf8: value)[...]
+        let parsed: Version.Semantic?
+        do throws(Version.Semantic.ParserError) {
+            parsed = try Version.Semantic.parser.parse(&input)
         } catch {
+            parsed = nil
+        }
+        guard let parsed, input.isEmpty else {
             throw .typeMismatch(expected: "valid semantic version", got: value)
         }
+        return parsed
     }
 
     private func identity(_ value: Swift.String) throws(JSON.Error) -> Package.Identity {
