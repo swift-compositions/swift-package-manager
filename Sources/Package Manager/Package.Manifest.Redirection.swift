@@ -16,12 +16,17 @@ extension Package.Manifest.Redirection {
         guard let clause = Package.Manifest.Clause.url(identity: identity, in: source) else {
             throw .dependencyNotDeclaredByURL(identity: identity)
         }
-        let planned = ".package(path: \"\(path)\")"
+        let planned = Self.clause(path: path)
         return Rewrite(
             source: clause.replacing(with: planned, in: source),
             declared: clause.text,
             planned: planned
         )
+    }
+
+    public static func clause(path: Swift.String) -> Swift.String {
+        let literal = path.replacing("\\", with: "\\\\").replacing("\"", with: "\\\"")
+        return ".package(path: \"\(literal)\")"
     }
 
     public static func restore(

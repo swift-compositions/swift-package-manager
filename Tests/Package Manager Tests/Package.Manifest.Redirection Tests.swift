@@ -68,6 +68,40 @@ extension Package.Manifest.Redirection.Test.Unit {
 }
 
 extension Package.Manifest.Redirection.Test.`Edge Case` {
+    @Test
+    func `a Windows path is written as an escaped string literal and restores byte-identically`() throws {
+        let manifest = """
+            let package = Package(
+                name: "consumer",
+                dependencies: [
+                    .package(url: "https://github.com/foo/swift-alpha.git", branch: "main")
+                ]
+            )
+            """
+        let rewrite = try Package.Manifest.Redirection.redirect(
+            manifest,
+            dependency: "https://github.com/foo/swift-alpha.git",
+            to: #"C:\Users\runner\swift-alpha"#
+        )
+        #expect(rewrite.planned == #".package(path: "C:\\Users\\runner\\swift-alpha")"#)
+        let restored = try Package.Manifest.Redirection.restore(
+            rewrite.source,
+            planned: rewrite.planned,
+            declared: rewrite.declared
+        )
+        #expect(restored == manifest)
+    }
+
+    @Test
+    func `a quote in a path is escaped`() {
+        #expect(
+            Package.Manifest.Redirection.clause(path: #"/a"b"#)
+                == #".package(path: "/a\"b")"#
+        )
+    }
+}
+
+extension Package.Manifest.Redirection.Test.`Edge Case` {
     private static let manifest = """
         let package = Package(
             name: "consumer",
