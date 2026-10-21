@@ -64,7 +64,7 @@ extension Package.Manager {
                 }
                 #expect(identity == "dependency")
 
-                #expect(path.hasSuffix("Tests/Fixtures/Dependency"))
+                #expect(path.replacing("\\", with: "/").hasSuffix("Tests/Fixtures/Dependency"))
             }
 
             @Test
@@ -177,25 +177,27 @@ extension Package.Manager {
                 )
             }
 
-            @Test
-            func `evaluation reports the package directory when its process exceeds the bound`()
-                throws
-            {
-                let fixture = try Self.fixture()
-                defer { EvaluationFixture.remove(fixture.root) }
-                let executable = fixture.root + "/hang"
-                try EvaluationFixture.executable(at: executable, script: "#!/bin/sh\nsleep 5\n")
+            #if !os(Windows)
+                @Test
+                func `evaluation reports the package directory when its process exceeds the bound`()
+                    throws
+                {
+                    let fixture = try Self.fixture()
+                    defer { EvaluationFixture.remove(fixture.root) }
+                    let executable = fixture.root + "/hang"
+                    try EvaluationFixture.executable(at: executable, script: "#!/bin/sh\nsleep 5\n")
 
-                #expect(
-                    throws: Package.Manager.Error.timedOut(directory: fixture.package)
-                ) {
-                    _ = try Package.Manager(executable: executable).evaluation(
-                        at: fixture.package,
-                        timeout: .milliseconds(50),
-                        scratch: fixture.scratch
-                    )
+                    #expect(
+                        throws: Package.Manager.Error.timedOut(directory: fixture.package)
+                    ) {
+                        _ = try Package.Manager(executable: executable).evaluation(
+                            at: fixture.package,
+                            timeout: .milliseconds(50),
+                            scratch: fixture.scratch
+                        )
+                    }
                 }
-            }
+            #endif
 
             @Test
             func `catalog binds targets to exact manifest bytes and the active toolchain`() throws {
