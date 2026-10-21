@@ -122,8 +122,7 @@ extension Package.Manifest.Clause {
         return Swift.String(decoding: bytes[open..<close], as: Swift.UTF8.self)
     }
 
-    private static func closingParen(in bytes: [Swift.UInt8], after start: Swift.Int) -> Swift.Int?
-    {
+    private static func closingParen(in bytes: [Swift.UInt8], after start: Swift.Int) -> Swift.Int? {
         let quote = Swift.UInt8(ascii: "\"" as Swift.Unicode.Scalar)
         let backslash = Swift.UInt8(ascii: "\\" as Swift.Unicode.Scalar)
         let open = Swift.UInt8(ascii: "(" as Swift.Unicode.Scalar)
