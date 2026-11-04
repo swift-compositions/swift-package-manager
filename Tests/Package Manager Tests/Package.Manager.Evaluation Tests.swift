@@ -33,21 +33,21 @@ extension Package.Manager {
             @Test
             func `evaluation returns the package name`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 #expect(evaluation.name == "composed")
             }
 
             @Test
             func `evaluation preserves the tools version`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 #expect(Swift.String(describing: evaluation.toolsVersion) == "6.3.0")
             }
 
             @Test
             func `evaluation reports the declared dependency`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 #expect(evaluation.dependencies.isEmpty == false)
                 #expect(evaluation.dependencies.count == 1)
                 #expect(evaluation.dependencies[0].identity == "dependency")
@@ -56,7 +56,7 @@ extension Package.Manager {
             @Test
             func `a genuine path dependency stays a filesystem source`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 let dependency = try #require(evaluation.dependencies.first)
                 guard case .fileSystem(let identity, let path) = dependency.source else {
                     Issue.record("Expected .fileSystem, got \(dependency.source)")
@@ -71,7 +71,7 @@ extension Package.Manager {
             func `no requirement is invented for a path dependency`() throws {
 
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 let dependency = try #require(evaluation.dependencies.first)
                 #expect(dependency.requirement == nil)
             }
@@ -79,7 +79,7 @@ extension Package.Manager {
             @Test
             func `products survive the evaluation`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 #expect(evaluation.products.count == 2)
                 #expect(evaluation.products.map(\.name) == ["Composed", "Composed Helper"])
             }
@@ -87,7 +87,7 @@ extension Package.Manager {
             @Test
             func `targets survive the evaluation`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 #expect(evaluation.targets.count == 2)
                 #expect(evaluation.targets.map(\.name) == ["Composed", "Composed Helper"])
             }
@@ -95,7 +95,7 @@ extension Package.Manager {
             @Test
             func `platforms survive the evaluation`() throws {
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 let platforms = try #require(evaluation.platforms)
                 #expect(platforms.count == 2)
                 #expect(platforms.map(\.platform) == [.macOS, .iOS])
@@ -106,7 +106,7 @@ extension Package.Manager {
             func `dependency products are back-filled from target edges`() throws {
 
                 let evaluation = try Package.Manager()
-                    .evaluation(at: "Tests/Fixtures/Composed")
+                    .evaluation(at: absolute(fixture: "Composed"))
                 let dependency = try #require(evaluation.dependencies.first)
                 #expect(dependency.products == ["Dependency Core"])
             }
@@ -115,14 +115,14 @@ extension Package.Manager {
             func `an unusable package directory fails as an operational error`() throws {
                 #expect(throws: Package.Manager.Error.self) {
                     try Package.Manager()
-                        .evaluation(at: "Tests/Fixtures/Does Not Exist")
+                        .evaluation(at: absolute(fixture: "Does Not Exist"))
                 }
             }
 
             @Test
             func `an unsuccessful termination preserves stderr`() throws {
                 do throws(Package.Manager.Error) {
-                    _ = try Package.Manager().evaluation(at: "Tests/Fixtures/Broken")
+                    _ = try Package.Manager().evaluation(at: absolute(fixture: "Broken"))
                     Issue.record("Expected the broken fixture to fail")
                 } catch {
                     guard case .command(let termination, let stderr) = error else {
@@ -141,11 +141,11 @@ extension Package.Manager {
 
                 let manager = Package.Manager()
 
-                let bare = try manager.manifest(at: "Tests/Fixtures/Fixture")
+                let bare = try manager.manifest(at: absolute(fixture: "Fixture"))
                 #expect(bare.name == "fixture")
                 #expect(bare.dependencies.isEmpty)
 
-                let composed = try manager.manifest(at: "Tests/Fixtures/Composed")
+                let composed = try manager.manifest(at: absolute(fixture: "Composed"))
                 #expect(composed.name == "composed")
                 #expect(composed.dependencies.count == 1)
             }
@@ -153,8 +153,8 @@ extension Package.Manager {
             @Test
             func `manifest and evaluation agree on what they both report`() throws {
                 let manager = Package.Manager()
-                let manifest = try manager.manifest(at: "Tests/Fixtures/Composed")
-                let evaluation = try manager.evaluation(at: "Tests/Fixtures/Composed")
+                let manifest = try manager.manifest(at: absolute(fixture: "Composed"))
+                let evaluation = try manager.evaluation(at: absolute(fixture: "Composed"))
                 #expect(manifest.name == evaluation.name)
                 #expect(manifest.toolsVersion == evaluation.toolsVersion)
                 #expect(manifest.dependencies.count == evaluation.dependencies.count)
