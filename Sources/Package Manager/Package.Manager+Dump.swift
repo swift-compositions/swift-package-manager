@@ -22,7 +22,7 @@ extension Package.Manager {
                     arguments: arguments,
                     stdout: .pipe,
                     stderr: .pipe,
-                    workingDirectory: directory,
+                    directory: directory,
                     timeout: timeout
                 )
             )
