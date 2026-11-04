@@ -1,58 +1,18 @@
 # swift-package-manager
 
-![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
+Use this package when a tool needs to ask SwiftPM about a package on disk, or to rewrite the dependency clauses in a `Package.swift`. Start from `Package.Manager` to evaluate a manifest, read the resolved workspace state, find where a dependency's sources were checked out, or put a dependency in edit mode. Use `Package.Manifest.Redirection` to point a URL dependency at a local path and back, and `Package.Manifest.Identity.Conflict` to find one package identity declared at two locations. The value types these return come from swift-spm-standard, which this package re-exports. For a dependency graph across many packages in a workspace, use swift-package-graph.
 
-Foundation-free SwiftPM operations through the installed Swift toolchain.
+## Laws
 
----
-
-## Quick Start
-
-Evaluate a package manifest through SwiftPM and receive the Layer-2 manifest model:
-
-```swift
-import Package_Manager
-
-let manager = Package.Manager()
-let manifest = try manager.manifest(at: "/path/to/package")
-
-print(manifest.name)
-```
-
----
-
-## Installation
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/swift-compositions/swift-package-manager.git", branch: "main")
-]
-```
-
-Use the `Package Manager` product and import `Package_Manager`.
-
-### Requirements
-
-- Swift 6.3+
-- macOS 26+
-- An installed Swift toolchain
-
----
-
-## Architecture
-
-`Package.Manager` owns operational SwiftPM interaction. It invokes `swift package dump-package` through [swift-process](https://github.com/swift-compositions/swift-process), parses output through [swift-json](https://github.com/swift-compositions/swift-json), and returns the external SwiftPM representations in [swift-spm-standard](https://github.com/swift-standards/swift-spm-standard).
-
----
-
-## Community
-
-<!-- BEGIN: discussion -->
-*Discussion thread will be created at the first public release.*
-<!-- END: discussion -->
-
----
-
-## License
-
-Apache 2.0. See [LICENSE](LICENSE.md).
+- `Package.Manager` runs SwiftPM as a subprocess on every call, with nothing cached. With the default `Package.Manager.launcher`, `swift` is found through `/usr/bin/env`, or `cmd.exe` on Windows. Any other `executable` is run directly as the `swift` binary.
+- Each subprocess has a timeout, 120 seconds by default. A subprocess that ends by a signal is reported as timed out, whatever sent the signal. For `Package.Manager.edit(_:path:at:timeout:)` and `Package.Manager.unedit(_:at:force:timeout:)` it is reported as locked instead when SwiftPM's stderr says another instance holds the build directory. Any other unsuccessful exit keeps SwiftPM's stderr.
+- With `scratch` set, SwiftPM keeps its state there and leaves the package's `.build` alone. `Package.Manager.resolution(at:scratch:)` only reads `workspace-state.json` from that directory, or from `.build`, and never runs SwiftPM.
+- `Package.Manager.manifest(at:timeout:scratch:)` keeps only the name, tools version and dependencies, with no products on the dependencies. A source-control dependency takes its first remote URL. Use `Package.Manager.evaluation(at:timeout:scratch:)` for the full manifest.
+- `Package.Manager.catalog(at:timeout:scratch:)` reads `Package.swift` before and after evaluating it and fails if the bytes changed. It records SHA-256 hex digests of those bytes and of the output of `swift --version`. Version-specific manifests such as `Package@swift-6.3.swift` are not part of the digest.
+- `Package.Manager.Materialized.source(of:at:scratch:)` gives a managed checkout's path under `checkouts` in the scratch or `.build` directory, never its declared location. A file-system or edited dependency gives its recorded path.
+- `Package.Manifest.Clause.all(in:)` finds each `.package` followed by optional whitespace and a balanced argument list. Parentheses inside string literals don't count. Unbalanced parentheses end the search without an error. Comments are not skipped. `Package.Manifest.Dependency.SourceControl.all(in:document:)` blanks comments first, and so does `Package.Manifest.Source.code(in:)`, which keeps every byte offset and line break.
+- A package's identity is the last path component of its URL, with trailing slashes and `.git` removed, lowercased.
+- `Package.Manifest.Redirection.redirect(_:dependency:to:)` finds the first clause whose URL has the same identity, not the same text, and replaces it with a path clause whose backslashes and quotes are escaped. `Package.Manifest.Redirection.restore(_:planned:declared:)` needs that exact path clause in the source. A redirect followed by a restore gives back the original bytes.
+- `Package.Manifest.Identity.Conflict` compares locations after trimming, lowercasing, dropping the scheme, turning `git@host:path` into `host/path`, and removing trailing slashes and `.git`. An identity with more than one location is a finding. It is fatal when manifests declare two or more of the locations, and a stale pin otherwise. Findings are sorted by identity, and their entries by location and then document.
+- `Package.Manifest.Identity.Conflict.entries(inResolved:document:)` returns no entries when the text isn't valid JSON, without an error.
+- `Package.Manifest.Identity.Conflict.isRootManifest(_:)` accepts `Package.swift` and `Package@swift-` followed by digits and dots and `.swift`.
