@@ -31,7 +31,9 @@ extension Machine {
     }
 }
 
-extension Package.Manager {
+enum `Package.Manager Tests` {}
+
+extension `Package.Manager Tests` {
 
     @Suite
     struct Test {
@@ -269,7 +271,7 @@ extension Package.Manager {
     }
 }
 
-extension Package.Manager.Test.Unit {
+extension `Package.Manager Tests`.Test.Unit {
     private static func fixture() throws -> (root: Swift.String, package: Swift.String, scratch: Swift.String) {
         try EvaluationFixture.make()
     }

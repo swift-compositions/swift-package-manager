@@ -1,7 +1,9 @@
 import Package_Manager
 import Testing
 
-extension Package.Manifest.Clause {
+enum `Package.Manifest.Clause Tests` {}
+
+extension `Package.Manifest.Clause Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -9,7 +11,7 @@ extension Package.Manifest.Clause {
     }
 }
 
-extension Package.Manifest.Clause.Test.Unit {
+extension `Package.Manifest.Clause Tests`.Test.Unit {
     private static let manifest = """
         // swift-tools-version: 6.4
         import PackageDescription
@@ -113,7 +115,7 @@ extension Package.Manifest.Clause.Test.Unit {
     }
 }
 
-extension Package.Manifest.Clause.Test.`Edge Case` {
+extension `Package.Manifest.Clause Tests`.Test.`Edge Case` {
     @Test
     func `a parenthesis inside a quoted path does not truncate the clause`() {
         let source = "deps: [.package(path: \"/tmp/a(b)/swift-x\")]"

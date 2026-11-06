@@ -2,7 +2,9 @@ import Package_Manager
 import Path
 import Testing
 
-extension Package.Manifest.Redirection {
+enum `Package.Manifest.Redirection Tests` {}
+
+extension `Package.Manifest.Redirection Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -10,7 +12,7 @@ extension Package.Manifest.Redirection {
     }
 }
 
-extension Package.Manifest.Redirection.Test.Unit {
+extension `Package.Manifest.Redirection Tests`.Test.Unit {
     private static let manifest = """
         // swift-tools-version: 6.4
         import PackageDescription
@@ -68,7 +70,7 @@ extension Package.Manifest.Redirection.Test.Unit {
     }
 }
 
-extension Package.Manifest.Redirection.Test.`Edge Case` {
+extension `Package.Manifest.Redirection Tests`.Test.`Edge Case` {
     @Test
     func `a Windows path is written as an escaped string literal and restores byte-identically`() throws {
         let manifest = """
@@ -103,7 +105,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
     }
 }
 
-extension Package.Manifest.Redirection.Test.`Edge Case` {
+extension `Package.Manifest.Redirection Tests`.Test.`Edge Case` {
     private static let manifest = """
         let package = Package(
             name: "consumer",

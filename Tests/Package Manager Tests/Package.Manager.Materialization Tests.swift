@@ -3,10 +3,15 @@ import Package_Manager
 import Path
 import Testing
 
-extension Package.Manager {
+extension `Package.Manager Tests` {
 
     @Suite
     struct `Materialization Test` {
+
+        /// A path's text with `/` separators, so one expectation holds on every platform.
+        private static func text(_ path: File.Path) -> Swift.String {
+            Swift.String(path.string.map { $0 == "\\" ? "/" : $0 })
+        }
 
         private static func reference(
             _ identity: Swift.String,
@@ -32,7 +37,7 @@ extension Package.Manager {
             let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
-            #expect(path == (try File.Path(validating: "/fixture/root/.build/checkouts/swift-paths")))
+            #expect(Self.text(path) == "/fixture/root/.build/checkouts/swift-paths")
 
             #expect(path.string != dependency.reference.location)
         }
@@ -55,7 +60,7 @@ extension Package.Manager {
                 scratch: "/fixture/scratch"
             )
 
-            #expect(path == (try File.Path(validating: "/fixture/scratch/checkouts/swift-paths")))
+            #expect(Self.text(path) == "/fixture/scratch/checkouts/swift-paths")
         }
 
         @Test
@@ -74,7 +79,7 @@ extension Package.Manager {
             let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"), scratch: "/fixture/scratch")
 
-            #expect(path == (try File.Path(validating: "/fixture/packages/swift-css")))
+            #expect(Self.text(path) == "/fixture/packages/swift-css")
             #expect(path.string.contains("checkouts") == false)
         }
 
@@ -106,7 +111,7 @@ extension Package.Manager {
             let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
-            #expect(path == "/fixture/edited/swift-parser")
+            #expect(Self.text(path) == "/fixture/edited/swift-parser")
             #expect(path.string.contains("checkouts") == false)
 
             #expect(dependency.state.superseded?.checkout.revision == "aaa111")

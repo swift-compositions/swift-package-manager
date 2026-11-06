@@ -1,7 +1,9 @@
 import Package_Manager
 import Testing
 
-extension Package.Manifest.Dependency.Location {
+enum `Package.Manifest.Dependency.Location Tests` {}
+
+extension `Package.Manifest.Dependency.Location Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -9,7 +11,7 @@ extension Package.Manifest.Dependency.Location {
     }
 }
 
-extension Package.Manifest.Dependency.Location.Test.Unit {
+extension `Package.Manifest.Dependency.Location Tests`.Test.Unit {
     @Test(arguments: [
         "https://github.com/foo/swift-alpha.git",
         "git@github.com:foo/swift-alpha",
@@ -22,7 +24,7 @@ extension Package.Manifest.Dependency.Location.Test.Unit {
     }
 }
 
-extension Package.Manifest.Dependency.Location.Test.`Edge Case` {
+extension `Package.Manifest.Dependency.Location Tests`.Test.`Edge Case` {
     @Test(arguments: ["", " ", "\n", " \t "])
     func `empty text and text of only whitespace are refused`(text: Swift.String) {
         #expect(Package.Manifest.Dependency.Location(text) == nil)

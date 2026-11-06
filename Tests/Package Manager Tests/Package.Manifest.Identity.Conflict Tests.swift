@@ -1,14 +1,16 @@
 import Package_Manager
 import Testing
 
-extension Package.Manifest.Identity.Conflict {
+enum `Package.Manifest.Identity.Conflict Tests` {}
+
+extension `Package.Manifest.Identity.Conflict Tests` {
     @Suite struct Test {
         @Suite struct Unit {}
         @Suite struct `Edge Case` {}
     }
 }
 
-extension Package.Manifest.Identity.Conflict.Test.Unit {
+extension `Package.Manifest.Identity.Conflict Tests`.Test.Unit {
     @Test
     func `two manifest locations for one identity are fatal`() {
         let entries = [
@@ -62,7 +64,7 @@ extension Package.Manifest.Identity.Conflict.Test.Unit {
     }
 }
 
-extension Package.Manifest.Identity.Conflict.Test.`Edge Case` {
+extension `Package.Manifest.Identity.Conflict Tests`.Test.`Edge Case` {
     @Test
     func `equivalent URL spellings share one canonical location`() {
         let entries = [
