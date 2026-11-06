@@ -40,7 +40,7 @@ let package = Package(
         .testTarget(
             name: "Package Manager Tests",
             dependencies: [
-                "Package Manager",
+                .target(name: "Package Manager"),
                 .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Path", package: "swift-path"),
             ]
