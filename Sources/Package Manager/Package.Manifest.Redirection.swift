@@ -1,3 +1,4 @@
+public import Path
 public import SPM_Standard
 
 extension Package.Manifest {
@@ -9,8 +10,10 @@ extension Package.Manifest.Redirection {
 
     public static func redirect(
         _ source: Swift.String,
+        // swift-linter:disable:next raw concept
+        // REASON: a .package(url:) or pin location, as written in a manifest or Package.resolved: SSH and scp-like git URLs (git@host:org/repo) are legal there and RFC_3986.URI and WHATWG_URL.URL refuse them; it stays text.
         dependency url: Swift.String,
-        to path: Swift.String
+        to path: Path::Path
     ) throws(Error) -> Rewrite {
         let identity = Package.Manifest.Clause.identity(ofURL: url)
         guard let clause = Package.Manifest.Clause.url(identity: identity, in: source) else {
@@ -24,8 +27,8 @@ extension Package.Manifest.Redirection {
         )
     }
 
-    public static func clause(path: Swift.String) -> Swift.String {
-        let literal = path.replacing("\\", with: "\\\\").replacing("\"", with: "\\\"")
+    public static func clause(path: Path::Path) -> Swift.String {
+        let literal = path.string.replacing("\\", with: "\\\\").replacing("\"", with: "\\\"")
         return ".package(path: \"\(literal)\")"
     }
 

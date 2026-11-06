@@ -1,10 +1,11 @@
+public import File_System
 private import JSON
 public import SPM_Standard
 
 extension Package.Manager {
 
     public func manifest(
-        at directory: Swift.String,
+        at directory: File.Directory,
         timeout: Swift.Duration = .seconds(120),
         scratch: Swift.String? = nil
     ) throws(Error) -> Package.Manifest {

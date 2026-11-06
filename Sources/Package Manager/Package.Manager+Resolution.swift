@@ -1,11 +1,11 @@
-internal import File_System
+public import File_System
 private import JSON
 public import SPM_Standard
 
 extension Package.Manager {
 
     public func resolution(
-        at directory: Swift.String,
+        at directory: File.Directory,
         scratch: Swift.String? = nil
     ) throws(Error) -> Package.Resolution {
         let path = "\(scratch ?? "\(directory)/.build")/workspace-state.json"

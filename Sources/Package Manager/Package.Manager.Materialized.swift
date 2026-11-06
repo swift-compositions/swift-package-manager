@@ -1,3 +1,5 @@
+public import File_System
+import Path
 public import SPM_Standard
 
 extension Package.Manager {
@@ -15,7 +17,7 @@ extension Package.Manager.Materialized {
 
     public func source(
         of dependency: Package.Resolution.Dependency,
-        at directory: Swift.String,
+        at directory: File.Directory,
         scratch: Swift.String? = nil
     ) -> Swift.String {
         switch dependency.state {
@@ -23,7 +25,7 @@ extension Package.Manager.Materialized {
             "\(scratch ?? "\(directory)/.build")/checkouts/\(dependency.subpath)"
 
         case .fileSystem(let path), .edited(let path, _):
-            path
+            path.string
         }
     }
 }

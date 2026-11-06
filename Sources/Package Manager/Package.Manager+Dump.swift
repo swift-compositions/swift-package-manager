@@ -1,3 +1,4 @@
+internal import File_System
 internal import JSON
 internal import Process
 internal import SPM_Standard
@@ -5,7 +6,7 @@ internal import SPM_Standard
 extension Package.Manager {
 
     internal func dump(
-        at directory: Swift.String,
+        at directory: File.Directory,
         timeout: Swift.Duration,
         scratch: Swift.String?
     ) throws(Error) -> JSON {
@@ -22,7 +23,7 @@ extension Package.Manager {
                     arguments: arguments,
                     stdout: .pipe,
                     stderr: .pipe,
-                    directory: directory,
+                    directory: directory.path,
                     timeout: timeout
                 )
             )
@@ -31,7 +32,7 @@ extension Package.Manager {
         }
 
         if case .signaled = output.status {
-            throw .timedOut(directory: directory)
+            throw .timedOut(directory: directory.path.string)
         }
         guard output.status == .exited(code: 0) else {
             throw .command(

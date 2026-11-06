@@ -23,6 +23,7 @@ let package = Package(
         .package(url: "https://github.com/swift-compositions/swift-file-system.git", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-json.git", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-path.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -33,11 +34,16 @@ let package = Package(
                 .product(name: "File System", package: "swift-file-system"),
                 .product(name: "JSON", package: "swift-json"),
                 .product(name: "Process", package: "swift-process"),
+                .product(name: "Path", package: "swift-path"),
             ]
         ),
         .testTarget(
             name: "Package Manager Tests",
-            dependencies: ["Package Manager"]
+            dependencies: [
+                "Package Manager",
+                .product(name: "File System", package: "swift-file-system"),
+                .product(name: "Path", package: "swift-path"),
+            ]
         ),
     ],
     swiftLanguageModes: [.v6]

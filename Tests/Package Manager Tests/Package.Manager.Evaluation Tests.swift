@@ -1,3 +1,4 @@
+import File_System
 import Package_Manager
 import Testing
 
@@ -5,11 +6,19 @@ private enum Machine {}
 
 extension Machine {
 
-    static var checkout: Swift.String { ".build/checkouts/swift-spm-standard" }
+    static func checkout() throws -> File.Directory {
+        try File.Directory(validating: ".build/checkouts/swift-spm-standard")
+    }
 
     static var substitutes: Bool {
+        let directory: File.Directory
+        do {
+            directory = try checkout()
+        } catch {
+            return false
+        }
         do throws(Package.Manager.Error) {
-            let evaluation = try Package.Manager().evaluation(at: checkout)
+            let evaluation = try Package.Manager().evaluation(at: directory)
             return evaluation.dependencies.contains { dependency in
                 guard case .sourceControl(_, .local, _) = dependency.source
                 else { return false }
@@ -99,7 +108,7 @@ extension Package.Manager {
                 let platforms = try #require(evaluation.platforms)
                 #expect(platforms.count == 2)
                 #expect(platforms.map(\.platform) == [.macOS, .iOS])
-                #expect(platforms.map(\.version) == ["13.0", "16.0"])
+                #expect(platforms.map(\.version.description) == ["13.0", "16.0"])
             }
 
             @Test
@@ -121,8 +130,9 @@ extension Package.Manager {
 
             @Test
             func `an unsuccessful termination preserves stderr`() throws {
+                let broken = try absolute(fixture: "Broken")
                 do throws(Package.Manager.Error) {
-                    _ = try Package.Manager().evaluation(at: absolute(fixture: "Broken"))
+                    _ = try Package.Manager().evaluation(at: broken)
                     Issue.record("Expected the broken fixture to fail")
                 } catch {
                     guard case .command(let termination, let stderr) = error else {
@@ -166,7 +176,7 @@ extension Package.Manager {
                 defer { EvaluationFixture.remove(fixture.root) }
 
                 let evaluation = try Package.Manager().evaluation(
-                    at: fixture.package,
+                    at: try File.Directory(validating: fixture.package),
                     scratch: fixture.scratch
                 )
 
@@ -191,7 +201,7 @@ extension Package.Manager {
                         throws: Package.Manager.Error.timedOut(directory: fixture.package)
                     ) {
                         _ = try Package.Manager(executable: executable).evaluation(
-                            at: fixture.package,
+                            at: try File.Directory(validating: fixture.package),
                             timeout: .milliseconds(50),
                             scratch: fixture.scratch
                         )
@@ -205,7 +215,7 @@ extension Package.Manager {
                 defer { EvaluationFixture.remove(fixture.root) }
 
                 let catalog = try Package.Manager().catalog(
-                    at: fixture.package,
+                    at: try File.Directory(validating: fixture.package),
                     scratch: fixture.scratch
                 )
 
@@ -230,7 +240,7 @@ extension Package.Manager {
             func `a mirror-substituted dependency stays source control with a local location`()
                 throws
             {
-                let evaluation = try Package.Manager().evaluation(at: Machine.checkout)
+                let evaluation = try Package.Manager().evaluation(at: Machine.checkout())
 
                 var observed = 0
                 for dependency in evaluation.dependencies {

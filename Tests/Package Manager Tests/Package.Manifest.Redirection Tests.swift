@@ -1,4 +1,5 @@
 import Package_Manager
+import Path
 import Testing
 
 extension Package.Manifest.Redirection {
@@ -29,7 +30,7 @@ extension Package.Manifest.Redirection.Test.Unit {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
             dependency: "https://github.com/foo/swift-alpha.git",
-            to: "/checkouts/swift-alpha"
+            to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         #expect(rewrite.planned == ".package(path: \"/checkouts/swift-alpha\")")
         #expect(
@@ -46,7 +47,7 @@ extension Package.Manifest.Redirection.Test.Unit {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
             dependency: "https://github.com/Foo/Swift-Alpha",
-            to: "/checkouts/swift-alpha"
+            to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         #expect(rewrite.declared.contains("swift-alpha.git"))
     }
@@ -56,7 +57,7 @@ extension Package.Manifest.Redirection.Test.Unit {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
             dependency: "https://github.com/foo/swift-alpha.git",
-            to: "/checkouts/swift-alpha"
+            to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         let restored = try Package.Manifest.Redirection.restore(
             rewrite.source,
@@ -81,7 +82,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
         let rewrite = try Package.Manifest.Redirection.redirect(
             manifest,
             dependency: "https://github.com/foo/swift-alpha.git",
-            to: #"C:\Users\runner\swift-alpha"#
+            to: try Path::Path(validating: #"C:\Users\runner\swift-alpha"#)
         )
         #expect(rewrite.planned == #".package(path: "C:\\Users\\runner\\swift-alpha")"#)
         let restored = try Package.Manifest.Redirection.restore(
@@ -93,9 +94,10 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
     }
 
     @Test
-    func `a quote in a path is escaped`() {
+    func `a quote in a path is escaped`() throws {
+        let path = try Path::Path(validating: #"/a"b"#)
         #expect(
-            Package.Manifest.Redirection.clause(path: #"/a"b"#)
+            Package.Manifest.Redirection.clause(path: path)
                 == #".package(path: "/a\"b")"#
         )
     }
@@ -121,7 +123,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
             try Package.Manifest.Redirection.redirect(
                 Self.manifest,
                 dependency: "https://github.com/foo/swift-delta.git",
-                to: "/checkouts/swift-delta"
+                to: try Path::Path(validating: "/checkouts/swift-delta")
             )
         }
     }
@@ -131,7 +133,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
             dependency: "https://github.com/foo/swift-alpha.git",
-            to: "/checkouts/swift-alpha"
+            to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
 
         #expect(

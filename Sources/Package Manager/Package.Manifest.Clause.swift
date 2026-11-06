@@ -93,6 +93,8 @@ extension Package.Manifest.Clause {
         return Swift.String(decoding: result, as: Swift.UTF8.self)
     }
 
+    // swift-linter:disable:next raw concept
+    // REASON: a .package(url:) or pin location, as written in a manifest or Package.resolved: SSH and scp-like git URLs (git@host:org/repo) are legal there and RFC_3986.URI and WHATWG_URL.URL refuse them; it stays text.
     public static func identity(ofURL url: Swift.String) -> Swift.String {
         var value = url[...]
         while value.last == "/" { value = value.dropLast() }

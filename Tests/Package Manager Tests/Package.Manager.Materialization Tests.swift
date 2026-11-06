@@ -1,4 +1,6 @@
+import File_System
 import Package_Manager
+import Path
 import Testing
 
 extension Package.Manager {
@@ -15,7 +17,7 @@ extension Package.Manager {
         }
 
         @Test
-        func `a managed checkout compiles from the scratch directory, not its location`() {
+        func `a managed checkout compiles from the scratch directory, not its location`() throws {
 
             let dependency = Package.Resolution.Dependency(
                 reference: Self.reference(
@@ -28,7 +30,7 @@ extension Package.Manager {
             )
 
             let path = Package.Manager().materialized
-                .source(of: dependency, at: "/fixture/root")
+                .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
             #expect(path == "/fixture/root/.build/checkouts/swift-paths")
 
@@ -36,7 +38,7 @@ extension Package.Manager {
         }
 
         @Test
-        func `an explicit scratch directory overrides the default`() {
+        func `an explicit scratch directory overrides the default`() throws {
             let dependency = Package.Resolution.Dependency(
                 reference: Self.reference(
                     "swift-paths",
@@ -49,7 +51,7 @@ extension Package.Manager {
 
             let path = Package.Manager().materialized.source(
                 of: dependency,
-                at: "/fixture/root",
+                at: try File.Directory(validating: "/fixture/root"),
                 scratch: "/fixture/scratch"
             )
 
@@ -57,7 +59,7 @@ extension Package.Manager {
         }
 
         @Test
-        func `a filesystem dependency compiles from its recorded path`() {
+        func `a filesystem dependency compiles from its recorded path`() throws {
 
             let dependency = Package.Resolution.Dependency(
                 reference: Self.reference(
@@ -65,19 +67,19 @@ extension Package.Manager {
                     kind: .fileSystem,
                     location: "/fixture/packages/swift-css"
                 ),
-                state: .fileSystem(path: "/fixture/packages/swift-css"),
+                state: .fileSystem(path: try Path::Path(validating: "/fixture/packages/swift-css")),
                 subpath: "swift-css"
             )
 
             let path = Package.Manager().materialized
-                .source(of: dependency, at: "/fixture/root", scratch: "/fixture/scratch")
+                .source(of: dependency, at: try File.Directory(validating: "/fixture/root"), scratch: "/fixture/scratch")
 
             #expect(path == "/fixture/packages/swift-css")
             #expect(path.contains("checkouts") == false)
         }
 
         @Test
-        func `an edited dependency compiles from its working copy`() {
+        func `an edited dependency compiles from its working copy`() throws {
 
             let superseded = Package.Resolution.Dependency.Superseded(
                 reference: Self.reference(
@@ -95,14 +97,14 @@ extension Package.Manager {
                     location: "/fixture/worktrees/swift-parser"
                 ),
                 state: .edited(
-                    path: "/fixture/edited/swift-parser",
+                    path: try Path::Path(validating: "/fixture/edited/swift-parser"),
                     basedOn: superseded
                 ),
                 subpath: "swift-parser"
             )
 
             let path = Package.Manager().materialized
-                .source(of: dependency, at: "/fixture/root")
+                .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
             #expect(path == "/fixture/edited/swift-parser")
             #expect(path.contains("checkouts") == false)
