@@ -13,12 +13,12 @@ extension Package.Manifest.Identity.Conflict.Test.Unit {
     func `two manifest locations for one identity are fatal`() {
         let entries = [
             Package.Manifest.Identity.Conflict.Entry(
-                url: "https://github.com/swift-standards/swift-rfc-7578.git",
+                url: Package.Manifest.Dependency.Location("https://github.com/swift-standards/swift-rfc-7578.git")!,
                 document: "Package.swift",
                 source: .manifest
             ),
             Package.Manifest.Identity.Conflict.Entry(
-                url: "https://github.com/swift-ietf/swift-rfc-7578.git",
+                url: Package.Manifest.Dependency.Location("https://github.com/swift-ietf/swift-rfc-7578.git")!,
                 document: "Package@swift-6.3.swift",
                 source: .manifest
             ),
@@ -33,12 +33,12 @@ extension Package.Manifest.Identity.Conflict.Test.Unit {
     func `a resolved pin disagreeing with a manifest is stale`() {
         let entries = [
             Package.Manifest.Identity.Conflict.Entry(
-                url: "https://github.com/swift-ietf/swift-rfc-7578.git",
+                url: Package.Manifest.Dependency.Location("https://github.com/swift-ietf/swift-rfc-7578.git")!,
                 document: "Package.swift",
                 source: .manifest
             ),
             Package.Manifest.Identity.Conflict.Entry(
-                url: "https://github.com/swift-standards/swift-rfc-7578.git",
+                url: Package.Manifest.Dependency.Location("https://github.com/swift-standards/swift-rfc-7578.git")!,
                 document: "Package.resolved",
                 source: .pin
             ),
@@ -67,12 +67,12 @@ extension Package.Manifest.Identity.Conflict.Test.`Edge Case` {
     func `equivalent URL spellings share one canonical location`() {
         let entries = [
             Package.Manifest.Identity.Conflict.Entry(
-                url: "https://GitHub.com/swift-ietf/swift-rfc-7578.git/",
+                url: Package.Manifest.Dependency.Location("https://GitHub.com/swift-ietf/swift-rfc-7578.git/")!,
                 document: "Package.swift",
                 source: .manifest
             ),
             Package.Manifest.Identity.Conflict.Entry(
-                url: "git@github.com:swift-ietf/swift-rfc-7578",
+                url: Package.Manifest.Dependency.Location("git@github.com:swift-ietf/swift-rfc-7578")!,
                 document: "Package@swift-6.3.swift",
                 source: .manifest
             ),

@@ -29,7 +29,7 @@ extension Package.Manifest.Redirection.Test.Unit {
     func `redirect rewrites the url clause to the planned path clause`() throws {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
-            dependency: "https://github.com/foo/swift-alpha.git",
+            dependency: Package.Manifest.Dependency.Location("https://github.com/foo/swift-alpha.git")!,
             to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         #expect(rewrite.planned == ".package(path: \"/checkouts/swift-alpha\")")
@@ -46,7 +46,7 @@ extension Package.Manifest.Redirection.Test.Unit {
     func `redirect matches on derived identity, not literal url`() throws {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
-            dependency: "https://github.com/Foo/Swift-Alpha",
+            dependency: Package.Manifest.Dependency.Location("https://github.com/Foo/Swift-Alpha")!,
             to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         #expect(rewrite.declared.contains("swift-alpha.git"))
@@ -56,7 +56,7 @@ extension Package.Manifest.Redirection.Test.Unit {
     func `redirect then restore is byte-identical`() throws {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
-            dependency: "https://github.com/foo/swift-alpha.git",
+            dependency: Package.Manifest.Dependency.Location("https://github.com/foo/swift-alpha.git")!,
             to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
         let restored = try Package.Manifest.Redirection.restore(
@@ -81,7 +81,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
             """
         let rewrite = try Package.Manifest.Redirection.redirect(
             manifest,
-            dependency: "https://github.com/foo/swift-alpha.git",
+            dependency: Package.Manifest.Dependency.Location("https://github.com/foo/swift-alpha.git")!,
             to: try Path::Path(validating: #"C:\Users\runner\swift-alpha"#)
         )
         #expect(rewrite.planned == #".package(path: "C:\\Users\\runner\\swift-alpha")"#)
@@ -122,7 +122,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
         ) {
             try Package.Manifest.Redirection.redirect(
                 Self.manifest,
-                dependency: "https://github.com/foo/swift-delta.git",
+                dependency: Package.Manifest.Dependency.Location("https://github.com/foo/swift-delta.git")!,
                 to: try Path::Path(validating: "/checkouts/swift-delta")
             )
         }
@@ -132,7 +132,7 @@ extension Package.Manifest.Redirection.Test.`Edge Case` {
     func `restore refuses when the composed clause is absent`() throws {
         let rewrite = try Package.Manifest.Redirection.redirect(
             Self.manifest,
-            dependency: "https://github.com/foo/swift-alpha.git",
+            dependency: Package.Manifest.Dependency.Location("https://github.com/foo/swift-alpha.git")!,
             to: try Path::Path(validating: "/checkouts/swift-alpha")
         )
 

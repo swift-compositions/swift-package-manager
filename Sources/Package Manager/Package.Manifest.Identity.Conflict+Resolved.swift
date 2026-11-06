@@ -14,9 +14,9 @@ extension Package.Manifest.Identity.Conflict {
         }
         guard let pins = json["pins"].array else { return [] }
         return pins.compactMap { pin in
-            let location = Swift.String(pin["location"])
-            guard !location.isEmpty else { return nil }
-            return Entry(url: location, document: document, source: .pin)
+            Package.Manifest.Dependency.Location(Swift.String(pin["location"])).map {
+                Entry(url: $0, document: document, source: .pin)
+            }
         }
     }
 }

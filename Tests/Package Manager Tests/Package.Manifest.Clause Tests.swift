@@ -29,8 +29,8 @@ extension Package.Manifest.Clause.Test.Unit {
     func `all finds every package clause in source order`() {
         let clauses = Package.Manifest.Clause.all(in: Self.manifest)
         #expect(clauses.count == 3)
-        #expect(clauses[0].declaredURL == "https://github.com/foo/swift-alpha.git")
-        #expect(clauses[1].declaredURL == "https://github.com/foo/swift-beta.git")
+        #expect(clauses[0].declaredURL?.text == "https://github.com/foo/swift-alpha.git")
+        #expect(clauses[1].declaredURL?.text == "https://github.com/foo/swift-beta.git")
         #expect(clauses[2].declaredPath == "../swift-gamma")
     }
 
@@ -38,7 +38,7 @@ extension Package.Manifest.Clause.Test.Unit {
     func `nested parentheses in a requirement do not close the clause early`() {
         let clauses = Package.Manifest.Clause.all(in: Self.manifest)
         #expect(clauses[1].text.hasSuffix("(from: \"1.0.0\"))"))
-        #expect(clauses[1].declaredURL == "https://github.com/foo/swift-beta.git")
+        #expect(clauses[1].declaredURL?.text == "https://github.com/foo/swift-beta.git")
     }
 
     @Test
@@ -46,7 +46,7 @@ extension Package.Manifest.Clause.Test.Unit {
         let source =
             #"dependencies: [.package (url: "https://example.com/swift-alpha.git", branch: "main")]"#
         #expect(
-            Package.Manifest.Clause.all(in: source).first?.declaredURL
+            Package.Manifest.Clause.all(in: source).first?.declaredURL?.text
                 == "https://example.com/swift-alpha.git"
         )
     }
@@ -64,7 +64,7 @@ extension Package.Manifest.Clause.Test.Unit {
         #expect(
             facts == [
                 .init(
-                    url: "https://github.com/swift-molecules/swift-alpha.git",
+                    url: Package.Manifest.Dependency.Location("https://github.com/swift-molecules/swift-alpha.git")!,
                     branch: "main",
                     document: "Package.swift"
                 )
@@ -75,7 +75,7 @@ extension Package.Manifest.Clause.Test.Unit {
     @Test
     func `url locates the clause by derived identity`() {
         let clause = Package.Manifest.Clause.url(identity: "swift-beta", in: Self.manifest)
-        #expect(clause?.declaredURL == "https://github.com/foo/swift-beta.git")
+        #expect(clause?.declaredURL?.text == "https://github.com/foo/swift-beta.git")
     }
 
     @Test
@@ -92,8 +92,9 @@ extension Package.Manifest.Clause.Test.Unit {
     func `identity derivation strips git, slash, and case`(
         url: Swift.String,
         expected: Swift.String
-    ) {
-        #expect(Package.Manifest.Clause.identity(ofURL: url) == expected)
+    ) throws {
+        let location = try #require(Package.Manifest.Dependency.Location(url))
+        #expect(Package.Manifest.Clause.identity(ofURL: location) == expected)
     }
 
     @Test

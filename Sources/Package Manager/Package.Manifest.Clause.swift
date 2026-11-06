@@ -60,10 +60,12 @@ extension Package.Manifest.Clause {
         }
     }
 
-    public var declaredURL: Swift.String? {
+    public var declaredURL: Package.Manifest.Dependency.Location? {
         Self.declaredURL(in: text)
     }
 
+    // swift-linter:disable:next raw concept
+    // REASON: a .package(path:) argument as a manifest spells it, usually relative, read back and never opened here; looked at Path::Path, which refuses the empty text a clause may hold, and Package.Dependency.Source.path, which holds this same text raw in SPM_Standard.
     public var declaredPath: Swift.String? {
         Self.declaredPath(in: text)
     }
@@ -72,8 +74,8 @@ extension Package.Manifest.Clause {
         Self.quoted(after: "branch:", in: text)
     }
 
-    public static func declaredURL(in text: Swift.String) -> Swift.String? {
-        quoted(after: "url:", in: text)
+    public static func declaredURL(in text: Swift.String) -> Package.Manifest.Dependency.Location? {
+        quoted(after: "url:", in: text).flatMap { Package.Manifest.Dependency.Location($0) }
     }
 
     public static func declaredPath(in text: Swift.String) -> Swift.String? {
@@ -93,10 +95,8 @@ extension Package.Manifest.Clause {
         return Swift.String(decoding: result, as: Swift.UTF8.self)
     }
 
-    // swift-linter:disable:next raw concept
-    // REASON: a .package(url:) or pin location, as written in a manifest or Package.resolved: SSH and scp-like git URLs (git@host:org/repo) are legal there and RFC_3986.URI and WHATWG_URL.URL refuse them; it stays text.
-    public static func identity(ofURL url: Swift.String) -> Swift.String {
-        var value = url[...]
+    public static func identity(ofURL url: Package.Manifest.Dependency.Location) -> Swift.String {
+        var value = url.text[...]
         while value.last == "/" { value = value.dropLast() }
         if value.hasSuffix(".git") { value = value.dropLast(4) }
         let component =

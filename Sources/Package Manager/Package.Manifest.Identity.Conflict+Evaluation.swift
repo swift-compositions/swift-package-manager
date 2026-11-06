@@ -37,13 +37,8 @@ extension Package.Manifest.Identity.Conflict {
         }
     }
 
-    // swift-linter:disable:next raw concept
-    // REASON: a .package(url:) or pin location, as written in a manifest or Package.resolved: SSH and scp-like git URLs (git@host:org/repo) are legal there and RFC_3986.URI and WHATWG_URL.URL refuse them; it stays text.
-    public static func canonical(_ url: Swift.String) -> Swift.String {
-        var value = url[...]
-        while value.first?.isWhitespace == true { value = value.dropFirst() }
-        while value.last?.isWhitespace == true { value = value.dropLast() }
-        var location = Swift.String(value).lowercased()
+    public static func canonical(_ url: Package.Manifest.Dependency.Location) -> Swift.String {
+        var location = url.text.lowercased()
 
         if let scheme = location.firstIndex(of: ":"),
             location[location.index(after: scheme)...].hasPrefix("//")
