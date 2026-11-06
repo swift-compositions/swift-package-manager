@@ -29,12 +29,12 @@ extension Package.Manager {
                 subpath: "swift-paths"
             )
 
-            let path = Package.Manager().materialized
+            let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
-            #expect(path == "/fixture/root/.build/checkouts/swift-paths")
+            #expect(path == (try File.Path(validating: "/fixture/root/.build/checkouts/swift-paths")))
 
-            #expect(path != dependency.reference.location)
+            #expect(path.string != dependency.reference.location)
         }
 
         @Test
@@ -49,13 +49,13 @@ extension Package.Manager {
                 subpath: "swift-paths"
             )
 
-            let path = Package.Manager().materialized.source(
+            let path = try Package.Manager().materialized.source(
                 of: dependency,
                 at: try File.Directory(validating: "/fixture/root"),
                 scratch: "/fixture/scratch"
             )
 
-            #expect(path == "/fixture/scratch/checkouts/swift-paths")
+            #expect(path == (try File.Path(validating: "/fixture/scratch/checkouts/swift-paths")))
         }
 
         @Test
@@ -71,11 +71,11 @@ extension Package.Manager {
                 subpath: "swift-css"
             )
 
-            let path = Package.Manager().materialized
+            let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"), scratch: "/fixture/scratch")
 
-            #expect(path == "/fixture/packages/swift-css")
-            #expect(path.contains("checkouts") == false)
+            #expect(path == (try File.Path(validating: "/fixture/packages/swift-css")))
+            #expect(path.string.contains("checkouts") == false)
         }
 
         @Test
@@ -103,11 +103,11 @@ extension Package.Manager {
                 subpath: "swift-parser"
             )
 
-            let path = Package.Manager().materialized
+            let path = try Package.Manager().materialized
                 .source(of: dependency, at: try File.Directory(validating: "/fixture/root"))
 
             #expect(path == "/fixture/edited/swift-parser")
-            #expect(path.contains("checkouts") == false)
+            #expect(path.string.contains("checkouts") == false)
 
             #expect(dependency.state.superseded?.checkout.revision == "aaa111")
             #expect(dependency.revision == nil)

@@ -8,14 +8,7 @@ extension Package.Manager {
         at directory: File.Directory,
         scratch: Swift.String? = nil
     ) throws(Error) -> Package.Resolution {
-        let path = "\(scratch ?? "\(directory)/.build")/workspace-state.json"
-
-        let location: File.Path
-        do throws(File.Path.Error) {
-            location = try File.Path(path)
-        } catch {
-            throw .state
-        }
+        let location = (try Package.Manager.scratch(scratch, in: directory) / File.Path.Component(unchecked: "workspace-state.json")).path
 
         let bytes: [Byte]
 
