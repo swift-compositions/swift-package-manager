@@ -4,13 +4,17 @@ import Testing
 
 private func bytes(_ text: Swift.String) -> [UInt8] { Array(text.utf8) }
 
-@Suite struct `Edit lock classification` {
-    @Suite struct Unit {}
-    @Suite struct `Edge Case` {}
-    @Suite struct Integration {}
+enum `Package.Manager.Edit Tests` {}
+
+extension `Package.Manager.Edit Tests` {
+    @Suite struct `Edit lock classification` {
+        @Suite struct Unit {}
+        @Suite struct `Edge Case` {}
+        @Suite struct Integration {}
+    }
 }
 
-extension `Edit lock classification`.Unit {
+extension `Package.Manager.Edit Tests`.`Edit lock classification`.Unit {
     @Test
     func `SwiftPM's waiting notice is recognised`() {
 
@@ -38,7 +42,7 @@ extension `Edit lock classification`.Unit {
     }
 }
 
-extension `Edit lock classification`.`Edge Case` {
+extension `Package.Manager.Edit Tests`.`Edit lock classification`.`Edge Case` {
     @Test
     func `a stderr shorter than the needle does not overrun`() {
 
