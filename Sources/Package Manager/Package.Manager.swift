@@ -1,8 +1,8 @@
-public import SPM_Standard
 internal import FIPS_180_4
 public import File_System
 internal import JSON
 internal import Process
+public import SPM_Standard
 
 extension Package {
 
