@@ -62,8 +62,43 @@ extension Package.Manager {
     private func manifestSource(
         at directory: File.Directory
     ) throws(Error) -> [Byte] {
+        var source = try contents(of: directory[file: "Package.swift"], in: directory)
+        for manifest in try versionedManifests(in: directory) {
+            source.append(Byte(bitPattern: 0))
+            source.append(contentsOf: [Byte](utf8: manifest.name))
+            source.append(Byte(bitPattern: 0))
+            source.append(contentsOf: try contents(of: File(manifest.path), in: directory))
+        }
+        return source
+    }
+
+    private func versionedManifests(
+        in directory: File.Directory
+    ) throws(Error) -> [(name: Swift.String, path: File.Path)] {
+        let entries: [File.Directory.Entry]
+        do throws(File.Directory.Contents.Error) {
+            entries = try File.Directory.Contents.list(at: directory)
+        } catch {
+            throw .manifestUnavailable(directory: directory.path.string)
+        }
+        return
+            entries
+            .compactMap { entry -> (name: Swift.String, path: File.Path)? in
+                guard let name = Swift.String(entry.name), name != "Package.swift",
+                    Package.Manifest.Identity.Conflict.isRootManifest(name),
+                    let path = entry.pathIfValid
+                else { return nil }
+                return (name, path)
+            }
+            .sorted { $0.name < $1.name }
+    }
+
+    private func contents(
+        of file: File,
+        in directory: File.Directory
+    ) throws(Error) -> [Byte] {
         do throws(Either<File.System.Read.Full.Error, Never>) {
-            return try directory[file: "Package.swift"].read.full { bytes in
+            return try file.read.full { bytes in
                 var source = [Byte]()
                 source.reserveCapacity(bytes.count)
                 for index in bytes.indices {

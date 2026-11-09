@@ -249,6 +249,54 @@ extension `Package.Manager Tests` {
                 #expect(catalog.toolchain.count == 64)
                 #expect(catalog.evaluation.name == "fixture")
             }
+
+            @Test
+            func `catalog digest covers version-specific manifests`() throws {
+                let fixture = try Self.fixture()
+                defer { EvaluationFixture.remove(fixture.root) }
+                let directory = try File.Directory(validating: fixture.package)
+
+                let bare = try Package.Manager().catalog(at: directory, scratch: fixture.scratch)
+                try EvaluationFixture.write(
+                    """
+                    // swift-tools-version: 6.4
+                    import PackageDescription
+
+                    let package = Package(name: "fixture")
+                    """,
+                    to: fixture.package + "/Package@swift-6.4.swift"
+                )
+                let versioned = try Package.Manager().catalog(at: directory, scratch: fixture.scratch)
+
+                #expect(bare.manifest != versioned.manifest)
+            }
+
+            #if !os(Windows)
+                @Test
+                func `catalog fails when the manifest changes during evaluation`() throws {
+                    let fixture = try Self.fixture()
+                    defer { EvaluationFixture.remove(fixture.root) }
+                    let executable = fixture.root + "/touching"
+                    try EvaluationFixture.executable(
+                        at: executable,
+                        script: """
+                            #!/bin/sh
+                            if [ "$1" = package ]; then echo "// changed" >> Package.swift; fi
+                            exec swift "$@"
+
+                            """
+                    )
+
+                    #expect(
+                        throws: Package.Manager.Error.manifestChanged(directory: fixture.package)
+                    ) {
+                        _ = try Package.Manager(executable: executable).catalog(
+                            at: try File.Directory(validating: fixture.package),
+                            scratch: fixture.scratch
+                        )
+                    }
+                }
+            #endif
         }
 
         @Suite(

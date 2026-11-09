@@ -26,6 +26,10 @@ enum EvaluationFixture {
         FileManager.default.fileExists(atPath: path)
     }
 
+    static func write(_ text: Swift.String, to path: Swift.String) throws {
+        try Data(text.utf8).write(to: URL(fileURLWithPath: path))
+    }
+
     static func executable(at path: Swift.String, script: Swift.String) throws {
         try Data(script.utf8).write(to: URL(fileURLWithPath: path))
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: path)
