@@ -71,18 +71,27 @@ extension Package.Manifest.Identity.Conflict {
     public static func entries(
         inResolved source: Swift.String,
         document: Swift.String = "Package.resolved"
-    ) -> [Entry] {
+    ) throws(Error) -> [Entry] {
         let json: JSON
         do throws(JSON.Error) {
             json = try JSON.parse(source)
         } catch {
-            return []
+            throw .resolved(document: document)
         }
-        guard let pins = json["pins"].array else { return [] }
-        return pins.compactMap { pin in
-            Package.Manifest.Dependency.Location(Swift.String(pin["location"])).map {
-                Entry(url: $0, document: document, source: .pin)
+        if let pins = json["pins"].array {
+            return pins.compactMap { pin in
+                Package.Manifest.Dependency.Location(Swift.String(pin["location"])).map {
+                    Entry(url: $0, document: document, source: .pin)
+                }
             }
         }
+        if let pins = json["object"]["pins"].array {
+            return pins.compactMap { pin in
+                Package.Manifest.Dependency.Location(Swift.String(pin["repositoryURL"])).map {
+                    Entry(url: $0, document: document, source: .pin)
+                }
+            }
+        }
+        throw .resolved(document: document)
     }
 }
