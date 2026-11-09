@@ -209,6 +209,30 @@ extension `Package.Manager Tests` {
                         )
                     }
                 }
+
+                @Test
+                func `a signal sent before the bound is a command failure, not a timeout`() throws {
+                    let fixture = try Self.fixture()
+                    defer { EvaluationFixture.remove(fixture.root) }
+                    let executable = fixture.root + "/terminate"
+                    try EvaluationFixture.executable(
+                        at: executable,
+                        script: "#!/bin/sh\nkill -TERM $$\n"
+                    )
+
+                    #expect(
+                        throws: Package.Manager.Error.command(
+                            termination: .signaled(signal: 15),
+                            stderr: []
+                        )
+                    ) {
+                        _ = try Package.Manager(executable: executable).evaluation(
+                            at: try File.Directory(validating: fixture.package),
+                            timeout: .seconds(120),
+                            scratch: fixture.scratch
+                        )
+                    }
+                }
             #endif
 
             @Test

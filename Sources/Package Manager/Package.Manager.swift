@@ -90,6 +90,7 @@ extension Package.Manager {
         }
         arguments.append("dump-package")
         let output: Process.Output
+        let started = ContinuousClock.now
         do throws(Process.Error) {
             output = try Process.Spawn.run(
                 .init(
@@ -105,7 +106,7 @@ extension Package.Manager {
             throw .execution
         }
 
-        if case .signaled = output.status {
+        if Self.expired(output.status, since: started, timeout: timeout) {
             throw .timedOut(directory: directory.path.string)
         }
         guard output.status == .exited(code: 0) else {
@@ -123,6 +124,15 @@ extension Package.Manager {
         } catch {
             throw .manifest
         }
+    }
+
+    internal static func expired(
+        _ status: Process.Status,
+        since started: ContinuousClock.Instant,
+        timeout: Swift.Duration
+    ) -> Swift.Bool {
+        guard case .signaled = status else { return false }
+        return started.duration(to: ContinuousClock.now) >= timeout
     }
 
     internal func termination(_ status: Process.Status) -> Termination {
@@ -169,6 +179,7 @@ extension Package.Manager {
         timeout: Swift.Duration
     ) throws(Error) {
         let output: Process.Output
+        let started = ContinuousClock.now
         do throws(Process.Error) {
             output = try Process.Spawn.run(
                 .init(
@@ -184,7 +195,7 @@ extension Package.Manager {
             throw .execution
         }
 
-        if case .signaled = output.status {
+        if Self.expired(output.status, since: started, timeout: timeout) {
             let stderr = output.stderr ?? []
             throw Self.waiting(onLockIn: stderr)
                 ? .locked(directory: directory.path.string)
@@ -433,6 +444,7 @@ extension Package.Manager {
         timeout: Swift.Duration
     ) throws(Error) -> [Byte] {
         let output: Process.Output
+        let started = ContinuousClock.now
         do throws(Process.Error) {
             output = try Process.Spawn.run(
                 .init(
@@ -446,7 +458,7 @@ extension Package.Manager {
         } catch {
             throw .execution
         }
-        if case .signaled = output.status {
+        if Self.expired(output.status, since: started, timeout: timeout) {
             throw .timedOut(directory: executable)
         }
         guard output.status == .exited(code: 0) else {
