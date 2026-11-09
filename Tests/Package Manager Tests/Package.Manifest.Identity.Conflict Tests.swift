@@ -99,4 +99,22 @@ extension `Package.Manifest.Identity.Conflict Tests`.Test.`Edge Case` {
         #expect(entries.count == 1)
         #expect(entries.first?.identity == "swift-alpha")
     }
+
+    @Test
+    func `commented-out package clauses are not manifest entries`() {
+        let source = """
+            dependencies: [
+                // .package(url: "https://github.com/swift-ietf/swift-alpha.git", branch: "main"),
+                /* .package(url: "https://github.com/elsewhere/swift-alpha.git", branch: "main"), */
+                .package(url: "https://github.com/swift-molecules/swift-alpha.git", branch: "main")
+            ]
+            """
+
+        let entries = Package.Manifest.Identity.Conflict.entries(
+            in: source,
+            document: "Package.swift"
+        )
+        #expect(entries.count == 1)
+        #expect(Package.Manifest.Identity.Conflict.findings(in: entries).isEmpty)
+    }
 }

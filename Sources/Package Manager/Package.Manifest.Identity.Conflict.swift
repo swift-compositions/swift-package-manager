@@ -20,7 +20,8 @@ extension Package.Manifest.Identity.Conflict {
         in manifest: Swift.String,
         document: Swift.String
     ) -> [Entry] {
-        Package.Manifest.Clause.all(in: manifest).compactMap { clause in
+        let code = Package.Manifest.Source.code(in: manifest)
+        return Package.Manifest.Clause.all(in: code).compactMap { clause in
             clause.declaredURL.map {
                 Entry(url: $0, document: document, source: .manifest)
             }
