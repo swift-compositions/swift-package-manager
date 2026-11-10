@@ -26,8 +26,9 @@ enum EvaluationFixture {
         FileManager.default.fileExists(atPath: path)
     }
 
-    static func write(_ text: Swift.String, to path: Swift.String) throws {
-        try Data(text.utf8).write(to: URL(fileURLWithPath: path))
+    /// Whether `text` was written to `path`.
+    static func write(_ text: Swift.String, to path: Swift.String) -> Bool {
+        FileManager.default.createFile(atPath: path, contents: Data(text.utf8))
     }
 
     static func executable(at path: Swift.String, script: Swift.String) throws {

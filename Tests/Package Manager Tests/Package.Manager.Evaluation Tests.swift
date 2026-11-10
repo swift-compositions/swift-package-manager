@@ -257,14 +257,16 @@ extension `Package.Manager Tests` {
                 let directory = try File.Directory(validating: fixture.package)
 
                 let bare = try Package.Manager().catalog(at: directory, scratch: fixture.scratch)
-                try EvaluationFixture.write(
-                    """
-                    // swift-tools-version: 6.4
-                    import PackageDescription
+                #expect(
+                    EvaluationFixture.write(
+                        """
+                        // swift-tools-version: 6.4
+                        import PackageDescription
 
-                    let package = Package(name: "fixture")
-                    """,
-                    to: fixture.package + "/Package@swift-6.4.swift"
+                        let package = Package(name: "fixture")
+                        """,
+                        to: fixture.package + "/Package@swift-6.4.swift"
+                    )
                 )
                 let versioned = try Package.Manager().catalog(at: directory, scratch: fixture.scratch)
 
