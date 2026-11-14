@@ -118,6 +118,34 @@ extension `Package.Manager Tests` {
             #expect(Package.Build.Plan(product: "tool", at: directory, configuration: .release) == nil)
         }
 
+        @Test
+        func `of two task stores the plan is read from the one the build used last, whichever was written last`() throws {
+            let fixture = try EvaluationFixture.make()
+            defer { EvaluationFixture.remove(fixture.root) }
+            let out = fixture.package + "/.build/out"
+            let data = out + "/Intermediates.noindex/XCBuildData"
+            let plain = Self.commands(in: out).filter { $0.first != "Ld" && $0.first != "/usr/bin/codesign" }
+            let coloured = plain.map { $0.first == "builtin-SwiftDriver" ? $0 + ["-color-diagnostics"] : $0 }
+            for (name, commands) in [("aaaa", coloured), ("bbbb", plain)] {
+                var store: [Byte] = []
+                for command in commands {
+                    if command.first == "builtin-SwiftDriver" {
+                        store += Msgpack.Value.array(command.map { .string($0) }).bytes
+                    } else {
+                        store += Msgpack.Value.array([.string("Ld"), .string(command.last ?? ""), .string("normal")]).bytes
+                        store += Msgpack.Value.array(command.map { .array([.integer(0), .binary($0.utf8.map { Byte(bitPattern: $0) })]) }).bytes
+                    }
+                }
+                #expect(EvaluationFixture.directory(at: data + "/" + name + ".xcbuilddata"))
+                #expect(EvaluationFixture.write(store.map(\.bitPattern), to: data + "/" + name + ".xcbuilddata/task-store.msgpack"))
+            }
+            let directory = try File.Directory(validating: fixture.package)
+            #expect(EvaluationFixture.write("bbbb\naaaa\n", to: data + "/prior-build-descriptions.txt"))
+            #expect(Package.Build.Plan(product: "tool", at: directory) == Package.Build.Plan(commands: coloured, directory: directory))
+            #expect(EvaluationFixture.write("bbbb\naaaa\nbbbb\n", to: data + "/prior-build-descriptions.txt"))
+            #expect(Package.Build.Plan(product: "tool", at: directory) == Package.Build.Plan(commands: plain, directory: directory))
+        }
+
         static func plan(in root: Swift.String) -> Package.Build.Plan? {
             let intermediates = root + "/Value-t.build/Objects-normal/arm64"
             let directory: File.Directory

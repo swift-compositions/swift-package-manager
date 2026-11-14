@@ -226,18 +226,22 @@ extension Package.Build.Plan {
         } catch {
             return nil
         }
-        let found = entries.compactMap { entry -> (path: File.Path, modified: Kernel.Time)? in
+        let history = (data / File.Path.Component(unchecked: "prior-build-descriptions.txt")).path
+        let used = Swift.String(decoding: Self.contents(of: history.string) ?? [], as: UTF8.self)
+            .split(whereSeparator: \.isNewline)
+            .map { $0 + ".xcbuilddata" }
+        let found = entries.compactMap { entry -> (path: File.Path, modified: Kernel.Time, used: Int)? in
             guard let name = Swift.String(entry.name), name.hasSuffix(".xcbuilddata"),
                 let path = entry.pathIfValid
             else { return nil }
             let store = (File.Directory(path) / File.Path.Component(unchecked: "task-store.msgpack")).path
             do throws(Kernel.File.Stats.Error) {
-                return (store, try File(store).stat.info.modificationTime)
+                return (store, try File(store).stat.info.modificationTime, used.lastIndex { $0 == name } ?? -1)
             } catch {
                 return nil
             }
         }
-        let stores = found.sorted { $0.modified > $1.modified }
+        let stores = found.sorted { $0.used == $1.used ? $0.modified > $1.modified : $0.used > $1.used }
         for store in stores {
             guard let bytes = Self.contents(of: store.path.string),
                 let commands = Self.commands(in: bytes.map { Byte(bitPattern: $0) })
