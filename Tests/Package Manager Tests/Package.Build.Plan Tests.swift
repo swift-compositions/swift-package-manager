@@ -45,10 +45,10 @@ extension `Package.Manager Tests` {
 
             let compile = plan.compiles["Value"]
             #expect(plan.compiles.count == 1)
-            #expect(compile?.directory.path.string == "/work")
+            #expect(compile?.directory == (try File.Directory(validating: "/work")))
             #expect(compile?.arguments.first == "/toolchain/swiftc")
             #expect(Set(plan.links.keys) == ["/build/Products/Debug/Value.o", "/build/Products/Debug/tool"])
-            #expect(plan.links["/build/Products/Debug/tool"]?.directory.path.string == "/package")
+            #expect(plan.links["/build/Products/Debug/tool"]?.directory == (try File.Directory(validating: "/package")))
             #expect(plan.signatures["/build/Products/Debug/tool"]?.arguments.first == "/usr/bin/codesign")
         }
 
@@ -64,7 +64,7 @@ extension `Package.Manager Tests` {
         }
 
         @Test
-        func `a source list's escaped and quoted paths with spaces are listed`() throws {
+        func `a source list's paths with spaces are listed in the form Swift Build writes them`() throws {
             let fixture = try EvaluationFixture.make()
             defer { EvaluationFixture.remove(fixture.root) }
             let plan = try #require(Self.plan(in: fixture.root))
@@ -156,11 +156,19 @@ extension `Package.Manager Tests` {
             }
             guard EvaluationFixture.directory(at: intermediates) else { return nil }
             let sources = root + "/Sources/Value Sources"
-            let list = """
-                \(sources.replacing(" ", with: "\\ "))/One.swift
-                "\(sources)/Two.swift"
+            #if os(Windows)
+                let list = """
+                    "\(sources)/One.swift"
+                    "\(sources)/Two.swift"
 
-                """
+                    """
+            #else
+                let list = """
+                    \(sources.replacing(" ", with: "\\ "))/One.swift
+                    "\(sources)/Two.swift"
+
+                    """
+            #endif
             #expect(EvaluationFixture.write(list, to: intermediates + "/Value.SwiftFileList"))
             return Package.Build.Plan(commands: commands(in: root), directory: directory)
         }
