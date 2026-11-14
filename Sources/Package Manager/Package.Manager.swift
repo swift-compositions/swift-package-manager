@@ -146,7 +146,7 @@ extension Package.Manager {
         }
         guard output.status == .exited(code: 0) else {
             throw .command(
-                termination: termination(output.status),
+                termination: Self.termination(output.status),
                 stderr: output.stderr ?? []
             )
         }
@@ -170,7 +170,7 @@ extension Package.Manager {
         return started.duration(to: ContinuousClock.now) >= timeout
     }
 
-    internal func termination(_ status: Process.Status) -> Termination {
+    internal static func termination(_ status: Process.Status) -> Termination {
         switch status {
         case .exited(let code): .exited(code: code)
         case .signaled(let signal): .signaled(signal: signal)
@@ -208,6 +208,48 @@ extension Package.Manager {
 
 extension Package.Manager {
 
+    public func build(
+        product: Swift.String,
+        at directory: File.Directory,
+        scratch: Swift.String? = nil,
+        timeout: Swift.Duration = .seconds(1800),
+        configuration: Package.Build.Configuration = .debug
+    ) throws(Error) {
+        var arguments = launcherPrefix + ["build", "-c", configuration.name, "--product", product]
+        if let scratch {
+            arguments.append(contentsOf: ["--scratch-path", scratch])
+        }
+        let output: Process.Output
+        let started = ContinuousClock.now
+        do throws(Process.Error) {
+            output = try Process.Spawn.run(
+                .init(
+                    executable: executable,
+                    arguments: arguments,
+                    stdout: .pipe,
+                    stderr: .pipe,
+                    directory: directory.path,
+                    timeout: timeout
+                )
+            )
+        } catch {
+            throw .execution
+        }
+        if Self.expired(output.status, since: started, timeout: timeout) {
+            throw .timedOut(directory: directory.path.string)
+        }
+        guard output.status == .exited(code: 0) else {
+            throw .build(
+                termination: Self.termination(output.status),
+                stdout: output.stdout ?? [],
+                stderr: output.stderr ?? []
+            )
+        }
+    }
+}
+
+extension Package.Manager {
+
     private func run(
         _ arguments: [Swift.String],
         at directory: File.Directory,
@@ -239,7 +281,7 @@ extension Package.Manager {
 
         guard output.status == .exited(code: 0) else {
             throw .command(
-                termination: termination(output.status),
+                termination: Self.termination(output.status),
                 stderr: output.stderr ?? []
             )
         }
@@ -498,7 +540,7 @@ extension Package.Manager {
         }
         guard output.status == .exited(code: 0) else {
             throw .command(
-                termination: termination(output.status),
+                termination: Self.termination(output.status),
                 stderr: output.stderr ?? []
             )
         }

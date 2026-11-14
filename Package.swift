@@ -24,6 +24,7 @@ let package = Package(
         .package(url: "https://github.com/swift-compositions/swift-json.git", branch: "main"),
         .package(url: "https://github.com/swift-compositions/swift-process.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-path.git", branch: "main"),
+        .package(url: "https://github.com/swift-standards/swift-msgpack-org-messagepack.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -35,6 +36,7 @@ let package = Package(
                 .product(name: "JSON", package: "swift-json"),
                 .product(name: "Process", package: "swift-process"),
                 .product(name: "Path", package: "swift-path"),
+                .product(name: "Msgpack Org Messagepack", package: "swift-msgpack-org-messagepack"),
             ]
         ),
         .testTarget(
@@ -43,6 +45,7 @@ let package = Package(
                 .target(name: "Package Manager"),
                 .product(name: "File System", package: "swift-file-system"),
                 .product(name: "Path", package: "swift-path"),
+                .product(name: "Msgpack Org Messagepack", package: "swift-msgpack-org-messagepack"),
             ]
         ),
     ],

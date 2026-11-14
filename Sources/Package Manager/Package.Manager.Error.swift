@@ -6,6 +6,8 @@ extension Package.Manager {
 
         case command(termination: Termination, stderr: [UInt8])
 
+        case build(termination: Termination, stdout: [UInt8], stderr: [UInt8])
+
         case output
 
         case manifest
