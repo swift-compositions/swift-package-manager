@@ -53,8 +53,8 @@ extension Package.Manager {
             throw .manifestChanged(directory: directory.path.string)
         }
         return .init(
-            manifest: FIPS_180_4.SHA256.digest(before).hex,
-            toolchain: FIPS_180_4.SHA256.digest(toolchain).hex,
+            manifest: NIST.FIPS.`180`.`4`.SHA256.digest(before).hex,
+            toolchain: NIST.FIPS.`180`.`4`.SHA256.digest(toolchain).hex,
             evaluation: evaluation
         )
     }
